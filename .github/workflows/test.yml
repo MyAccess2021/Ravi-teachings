@@ -13,19 +13,19 @@ jobs:
     - name: Checkout repo
       uses: actions/checkout@v3
 
-    # Add GitHub.com SSH fingerprint (fixes host key verify error)
+    # Add GitHub fingerprint to avoid host key errors
     - name: Add GitHub to known_hosts
       run: |
         mkdir -p ~/.ssh
         ssh-keyscan github.com >> ~/.ssh/known_hosts
 
-    # Setup SSH agent with your private key (ali)
+    # SSH Agent with your private key (ali)
     - name: Setup SSH
       uses: webfactory/ssh-agent@v0.7.0
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-    # Clone if missing, pull if exists
+    # Clone if not exists, pull if exists
     - name: Deploy to Server
       run: |
         ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "
@@ -35,13 +35,13 @@ jobs:
           echo 'Checking if project exists...'
           mkdir -p /root/projects
 
-          if [ ! -d \"\$PROJECT_DIR/.git\" ]; then
+          if [ ! -d \"$PROJECT_DIR/.git\" ]; then
             echo 'Repository not found — cloning now...'
             cd /root/projects
-            git clone '\$REPO_URL'
+            git clone \"$REPO_URL\"
           else
             echo 'Repository exists — pulling latest changes...'
-            cd '\$PROJECT_DIR'
+            cd \"$PROJECT_DIR\"
             git reset --hard
             git pull
           fi
