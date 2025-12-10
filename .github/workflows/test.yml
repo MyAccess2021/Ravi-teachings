@@ -13,25 +13,22 @@ jobs:
     - name: Checkout repo
       uses: actions/checkout@v3
 
-    # Add GitHub fingerprint to avoid host key errors
     - name: Add GitHub to known_hosts
       run: |
         mkdir -p ~/.ssh
         ssh-keyscan github.com >> ~/.ssh/known_hosts
 
-    # SSH Agent with your private key (ali)
     - name: Setup SSH
       uses: webfactory/ssh-agent@v0.7.0
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-    # Clone if not exists, pull if exists
     - name: Deploy to Server
+      env:
+        PROJECT_DIR: "/root/projects/Ravi-teachings"
+        REPO_URL: "git@github.com:MyAccess2021/Ravi-teachings.git"
       run: |
         ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "
-          PROJECT_DIR='/root/projects/Ravi-teachings'
-          REPO_URL='git@github.com:MyAccess2021/Ravi-teachings.git'
-
           echo 'Checking if project exists...'
           mkdir -p /root/projects
 
