@@ -10,32 +10,39 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
+    - name: Checkout repo
       uses: actions/checkout@v3
 
+    # Add GitHub.com SSH fingerprint (fixes host key verify error)
+    - name: Add GitHub to known_hosts
+      run: |
+        mkdir -p ~/.ssh
+        ssh-keyscan github.com >> ~/.ssh/known_hosts
+
+    # Setup SSH agent with your private key (ali)
     - name: Setup SSH
       uses: webfactory/ssh-agent@v0.7.0
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
+    # Clone if missing, pull if exists
     - name: Deploy to Server
       run: |
-        ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} '
-          PROJECT_DIR="/root/projects/Ravi-teachings"
-          REPO_URL="git@github.com:MyAccess2021/Ravi-teachings.git"
+        ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "
+          PROJECT_DIR='/root/projects/Ravi-teachings'
+          REPO_URL='git@github.com:MyAccess2021/Ravi-teachings.git'
 
-          echo "Checking if project exists..."
-
+          echo 'Checking if project exists...'
           mkdir -p /root/projects
 
-          if [ ! -d "$PROJECT_DIR/.git" ]; then
-            echo "Repository not found — cloning now..."
+          if [ ! -d \"\$PROJECT_DIR/.git\" ]; then
+            echo 'Repository not found — cloning now...'
             cd /root/projects
-            git clone "$REPO_URL"
+            git clone '\$REPO_URL'
           else
-            echo "Repository exists — pulling latest changes..."
-            cd "$PROJECT_DIR"
+            echo 'Repository exists — pulling latest changes...'
+            cd '\$PROJECT_DIR'
             git reset --hard
             git pull
           fi
-        '
+        "
